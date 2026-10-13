@@ -1,0 +1,709 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="dark">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>AI Bug Triage System – Detect Smarter. Fix Faster. Ship Confidently.</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="css/style.css">
+  <!-- Chart.js CDN -->
+  <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script>
+  <!-- Monaco Editor loader -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/monaco-editor/0.45.0/min/vs/loader.min.js"></script>
+</head>
+<body>
+
+  <!-- =========================================================================
+       AUTHENTICATION CONTAINER (LOGIN & REGISTRATION)
+       ========================================================================= -->
+  <div id="authContainer" class="auth-page">
+    <div class="auth-bg-grid"></div>
+    <div class="auth-ambient-glow"></div>
+
+    <div class="auth-card">
+      <!-- BRAND HEADER -->
+      <div class="auth-brand">
+        <div class="brand-icon-wrapper">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <path d="M12 2L2 7l10 5 10-5-10-5zM2 17l10 5 10-5M2 12l10 5 10-5"></path>
+          </svg>
+        </div>
+        <div class="brand-title">AI Bug Triage System</div>
+        <h1 class="auth-heading">Welcome Back, Developer!</h1>
+        <p class="auth-subtitle">Detect smarter. Fix faster. Ship confidently.</p>
+      </div>
+
+      <!-- THREE DISTINCT USER ROLES TABS (1-Click Persona Evaluator) -->
+      <div class="role-pills-container">
+        <button type="button" class="role-pill-btn active" data-role="admin">
+          <span>Admin</span>
+          <span class="role-badge admin">Full Control</span>
+        </button>
+        <button type="button" class="role-pill-btn" data-role="reporter">
+          <span>Reporter</span>
+          <span class="role-badge reporter">Submit & Track</span>
+        </button>
+        <button type="button" class="role-pill-btn" data-role="developer">
+          <span>Developer</span>
+          <span class="role-badge developer">Fix & Diff</span>
+        </button>
+      </div>
+
+      <!-- Quick Fill Helper Box -->
+      <div class="demo-quickfill-box">
+        <div class="demo-quickfill-text" id="demoQuickFillBox">
+          <strong>Alex Rivera (Admin)</strong> Manage users, routing rules, and enterprise analytics.
+        </div>
+        <button type="button" class="quickfill-btn" onclick="app.fillDemoCredentials(document.querySelector('.role-pill-btn.active').dataset.role)">
+          1-Click Fill
+        </button>
+      </div>
+
+      <!-- LOGIN FORM BLOCK -->
+      <div id="loginCardBlock">
+        <form id="loginForm">
+          <div class="form-group">
+            <label class="form-label" for="loginEmail">Email Address</label>
+            <div class="form-input-wrapper">
+              <input type="email" id="loginEmail" class="form-input" placeholder="developer@company.com" required value="admin@bugtriage.io">
+            </div>
+          </div>
+
+          <div class="form-group">
+            <label class="form-label" for="loginPassword">Password</label>
+            <div class="form-input-wrapper">
+              <input type="password" id="loginPassword" class="form-input" placeholder="••••••••••••" required value="AdminPass123!">
+              <button type="button" id="togglePasswordBtn" class="input-icon-btn" title="Show/Hide Password">
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                  <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"></path>
+                  <circle cx="12" cy="12" r="3"></circle>
+                </svg>
+              </button>
+            </div>
+          </div>
+
+          <div class="form-row-remember">
+            <label class="checkbox-label">
+              <input type="checkbox" id="rememberMeCheckbox" checked>
+              <span>Remember me</span>
+            </label>
+            <a href="#" onclick="alert('In development mode: You can log in using any of the 3 pre-configured demo accounts above.'); return false;">Forgot password?</a>
+          </div>
+
+          <button type="submit" id="loginSubmitBtn" class="btn-primary">
+            <span>Sign In to Dashboard</span>
+          </button>
+        </form>
+
+        <div class="auth-footer">
+          Don't have an account? <a href="#" onclick="app.toggleAuthMode('register'); return false;">Create an account</a>
+        </div>
+      </div>
+
+      <!-- REGISTRATION FORM BLOCK -->
+      <div id="registerCardBlock" style="display: none;">
+        <form id="registerForm">
+          <div class="form-group">
+            <label class="form-label" for="regName">Full Name</label>
+            <input type="text" id="regName" class="form-input" placeholder="Jordan Taylor" required>
+          </div>
+
+          <div class="form-group">
+            <label class="form-label" for="regEmail">Work Email</label>
+            <input type="email" id="regEmail" class="form-input" placeholder="jordan@company.com" required>
+          </div>
+
+          <div class="form-group">
+            <label class="form-label" for="regPassword">Password</label>
+            <input type="password" id="regPassword" class="form-input" placeholder="At least 8 characters" required minlength="8">
+          </div>
+
+          <div class="form-group">
+            <label class="form-label" for="regRole">Select Role</label>
+            <select id="regRole" class="form-input">
+              <option value="developer">Developer (Fix bugs & inspect code diffs)</option>
+              <option value="reporter">Bug Reporter (Submit reports & view triage)</option>
+              <option value="admin">Admin (System management & routing rules)</option>
+            </select>
+          </div>
+
+          <button type="submit" id="regSubmitBtn" class="btn-primary">
+            <span>Create Account</span>
+          </button>
+        </form>
+
+        <div class="auth-footer">
+          Already have an account? <a href="#" onclick="app.toggleAuthMode('login'); return false;">Sign in</a>
+        </div>
+      </div>
+
+    </div>
+  </div>
+
+  <!-- =========================================================================
+       MAIN APPLICATION LAYOUT (DASHBOARDS)
+       ========================================================================= -->
+  <div id="appContainer" class="app-layout" style="display: none;">
+
+    <!-- SIDEBAR NAVIGATION -->
+    <aside id="appSidebar" class="sidebar">
+      <div class="sidebar-header">
+        <div class="brand-icon-wrapper" style="width: 36px; height: 36px; margin: 0;">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="width: 20px; height: 20px;">
+            <path d="M12 2L2 7l10 5 10-5-10-5zM2 17l10 5 10-5M2 12l10 5 10-5"></path>
+          </svg>
+        </div>
+        <div class="brand-text">AI Bug Triage</div>
+      </div>
+
+      <nav class="sidebar-nav">
+        <div class="nav-item active" data-view="overview">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="7" height="7"></rect><rect x="14" y="3" width="7" height="7"></rect><rect x="14" y="14" width="7" height="7"></rect><rect x="3" y="14" width="7" height="7"></rect></svg>
+          <span class="nav-text">Overview</span>
+        </div>
+
+        <div class="nav-item" data-view="bugs">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="m8 2 1.88 1.88M14.12 3.88 16 2M9 7.13v-1a3.003 3.003 0 1 1 6 0v1M12 20c-3.3 0-6-2.7-6-6v-3a4 4 0 0 1 4-4h4a4 4 0 0 1 4 4v3c0 3.3-2.7 6-6 6M12 20v-9M6.53 9C4.6 8.8 3 7.1 3 5M6 13H2M3 21c0-2.1 1.7-3.9 3.8-4M20.97 5c0 2.1-1.6 3.8-3.5 4M18 13h4M17.2 17c2.1.1 3.8 1.9 3.8 4"></path></svg>
+          <span class="nav-text">All Bugs</span>
+        </div>
+
+        <div class="nav-item nav-admin-only" data-view="teams">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"></path><circle cx="9" cy="7" r="4"></circle><path d="M23 21v-2a4 4 0 0 0-3-3.87"></path><path d="M16 3.13a4 4 0 0 1 0 7.75"></path></svg>
+          <span class="nav-text">Development Teams</span>
+        </div>
+
+        <div class="nav-item nav-admin-only" data-view="users">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path><circle cx="12" cy="7" r="4"></circle></svg>
+          <span class="nav-text">Users & Roles</span>
+        </div>
+
+        <div class="nav-item" data-view="analytics">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="18" y1="20" x2="18" y2="10"></line><line x1="12" y1="20" x2="12" y2="4"></line><line x1="6" y1="20" x2="6" y2="14"></line></svg>
+          <span class="nav-text">Reports & Analytics</span>
+        </div>
+
+        <div class="nav-item nav-admin-only" data-view="logs">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path><polyline points="14 2 14 8 20 8"></polyline><line x1="16" y1="13" x2="8" y2="13"></line><line x1="16" y1="17" x2="8" y2="17"></line><polyline points="10 9 9 9 8 9"></polyline></svg>
+          <span class="nav-text">Activity Logs</span>
+        </div>
+
+        <div class="nav-item nav-admin-only" data-view="settings">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="3"></circle><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"></path></svg>
+          <span class="nav-text">Settings</span>
+        </div>
+      </nav>
+
+      <div class="sidebar-footer">
+        <div class="nav-item" id="sidebarLogoutBtn" data-view="logout" role="button" tabindex="0" onclick="app.logout()" style="cursor: pointer;">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"></path><polyline points="16 17 21 12 16 7"></polyline><line x1="21" y1="12" x2="9" y2="12"></line></svg>
+          <span class="nav-text">Logout</span>
+        </div>
+      </div>
+    </aside>
+
+    <!-- MAIN BODY CONTENT -->
+    <main class="main-content">
+      <!-- TOPBAR -->
+      <header class="topbar">
+        <div class="topbar-left">
+          <button id="sidebarToggleBtn" class="sidebar-toggle-btn" title="Toggle Sidebar">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="3" y1="12" x2="21" y2="12"></line><line x1="3" y1="6" x2="21" y2="6"></line><line x1="3" y1="18" x2="21" y2="18"></line></svg>
+          </button>
+          <div class="breadcrumbs">
+            <span>Bug Triage</span>
+            <span>/</span>
+            <span id="breadcrumbCurrent" class="crumb-current">Overview Dashboard</span>
+          </div>
+        </div>
+
+        <div class="topbar-right">
+          <!-- + Report a Bug CTA Button -->
+          <button class="action-btn-sm" style="background: var(--accent-gradient); color: #fff; font-weight: 600; padding: 7px 14px; border-radius: 8px; display: flex; align-items: center; gap: 6px;" onclick="app.openReportBugModal()">
+            <span>+</span> Report a Bug
+          </button>
+
+          <!-- Theme Toggle -->
+          <button id="themeToggleBtn" class="icon-btn" title="Toggle Theme">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="5"></circle></svg>
+          </button>
+
+          <!-- Notifications Bell -->
+          <div style="position: relative;">
+            <button id="notifBellBtn" class="icon-btn" title="Notifications">
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"></path><path d="M13.73 21a2 2 0 0 1-3.46 0"></path></svg>
+              <span id="notifBadgeCounter" class="badge-counter" style="display: none;">0</span>
+            </button>
+            <!-- Notifications Drawer Dropdown -->
+            <div id="notificationsDrawer" class="notifications-drawer">
+              <div class="drawer-header">
+                <span>Notifications</span>
+                <button id="markAllReadBtn" style="background: none; border: none; font-size: 11px; color: var(--accent-blue); cursor: pointer;">Mark all as read</button>
+              </div>
+              <div id="notifDrawerList" class="drawer-body"></div>
+            </div>
+          </div>
+
+          <!-- Topbar Direct Sign Out Button -->
+          <button id="topbarLogoutBtn" class="icon-btn" title="Sign Out" onclick="app.logout()" style="color: #ef4444;" aria-label="Sign Out">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"></path>
+              <polyline points="16 17 21 12 16 7"></polyline>
+              <line x1="21" y1="12" x2="9" y2="12"></line>
+            </svg>
+          </button>
+
+          <!-- User Profile with Dropdown -->
+          <div style="position: relative;">
+            <div class="user-profile-menu" id="userProfileMenuBtn" onclick="app.toggleUserMenu()">
+              <div id="topbarAvatar" class="user-avatar">A</div>
+              <div class="user-details">
+                <div id="topbarUserName" class="user-name">Alex Rivera</div>
+                <div id="topbarUserRole" class="user-role-label">admin</div>
+              </div>
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="color:var(--text-muted);"><path d="m6 9 6 6 6-6"/></svg>
+            </div>
+            <div id="userDropdownMenu" class="notifications-drawer" style="width: 220px; right: 0; padding: 8px;">
+              <div style="padding: 10px 12px; border-bottom: 1px solid var(--border-color); margin-bottom: 6px;">
+                <div id="dropdownUserFullName" style="font-weight: 600; font-size: 13.5px;">Alex Rivera</div>
+                <div id="dropdownUserEmail" style="font-size: 11.5px; color: var(--text-muted);">admin@bugtriage.io</div>
+              </div>
+              <button class="nav-item" style="width: 100%; border: none; background: transparent; cursor: pointer; color: #ef4444; display: flex; align-items: center; gap: 8px; padding: 8px 12px; font-size: 13px;" onclick="app.logout()">
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"></path><polyline points="16 17 21 12 16 7"></polyline><line x1="21" y1="12" x2="9" y2="12"></line></svg>
+                <span>Log Out</span>
+              </button>
+            </div>
+          </div>
+        </div>
+      </header>
+
+      <!-- VIEW PANELS -->
+      <div class="page-container">
+
+        <!-- VIEW 1: OVERVIEW DASHBOARD -->
+        <div id="view-overview" class="view-panel">
+          <!-- METRICS CARDS -->
+          <div class="metrics-grid">
+            <div class="stat-card">
+              <div class="stat-info">
+                <span class="stat-label">Total Bugs</span>
+                <span id="statTotalBugs" class="stat-value">0</span>
+                <span class="stat-subtext">Across all components</span>
+              </div>
+              <div class="stat-icon">📊</div>
+            </div>
+
+            <div class="stat-card">
+              <div class="stat-info">
+                <span class="stat-label">Open Bugs</span>
+                <span id="statOpenBugs" class="stat-value">0</span>
+                <span class="stat-subtext">Triaged & in progress</span>
+              </div>
+              <div class="stat-icon">🔄</div>
+            </div>
+
+            <div class="stat-card critical">
+              <div class="stat-info">
+                <span class="stat-label">Critical (P0 / P1)</span>
+                <span id="statCriticalBugs" class="stat-value" style="color: var(--p0-critical);">0</span>
+                <span class="stat-subtext">Immediate escalation</span>
+              </div>
+              <div class="stat-icon" style="color: var(--p0-critical);">🚨</div>
+            </div>
+
+            <div class="stat-card resolved">
+              <div class="stat-info">
+                <span class="stat-label">Resolved Bugs</span>
+                <span id="statResolvedBugs" class="stat-value" style="color: var(--p3-low);">0</span>
+                <span class="stat-subtext">Verified & closed</span>
+              </div>
+              <div class="stat-icon" style="color: var(--p3-low);">✅</div>
+            </div>
+
+            <div class="stat-card">
+              <div class="stat-info">
+                <span class="stat-label">Avg Resolution</span>
+                <span id="statAvgResolution" class="stat-value">0 hrs</span>
+                <span class="stat-subtext">Triage to patch</span>
+              </div>
+              <div class="stat-icon">⚡</div>
+            </div>
+
+            <div class="stat-card accuracy">
+              <div class="stat-info">
+                <span class="stat-label">AI Triage Accuracy</span>
+                <span id="statAiAccuracy" class="stat-value" style="color: var(--accent-purple);">0%</span>
+                <span class="stat-subtext">Developer validated</span>
+              </div>
+              <div class="stat-icon" style="color: var(--accent-purple);">🤖</div>
+            </div>
+          </div>
+
+          <!-- CHARTS GRID -->
+          <div class="charts-grid">
+            <div class="chart-card">
+              <div class="chart-header">
+                <div class="chart-title">Bugs by Severity (P0 - P4)</div>
+              </div>
+              <div class="chart-container">
+                <canvas id="chartSeverity"></canvas>
+              </div>
+            </div>
+
+            <div class="chart-card">
+              <div class="chart-header">
+                <div class="chart-title">Bugs by Lifecycle Status</div>
+              </div>
+              <div class="chart-container">
+                <canvas id="chartStatus"></canvas>
+              </div>
+            </div>
+
+            <div class="chart-card">
+              <div class="chart-header">
+                <div class="chart-title">Bug Ingestion Timeline (Last 7 Days)</div>
+              </div>
+              <div class="chart-container">
+                <canvas id="chartTimeline"></canvas>
+              </div>
+            </div>
+
+            <div class="chart-card">
+              <div class="chart-header">
+                <div class="chart-title">Bugs Assigned by Engineering Team</div>
+              </div>
+              <div class="chart-container">
+                <canvas id="chartTeams"></canvas>
+              </div>
+            </div>
+          </div>
+
+          <!-- RECENT BUGS TABLE -->
+          <div class="table-card">
+            <div class="table-header-toolbar">
+              <div class="toolbar-title">Recently Triaged Bugs</div>
+              <button class="action-btn-sm" onclick="app.switchView('bugs')">View All in Repository &rarr;</button>
+            </div>
+            <div class="table-responsive">
+              <table class="data-table">
+                <thead>
+                  <tr>
+                    <th>Bug ID</th>
+                    <th>Summary</th>
+                    <th>Severity</th>
+                    <th>Status</th>
+                    <th>Assigned Team</th>
+                    <th>Reporter</th>
+                    <th>Date</th>
+                    <th>Actions</th>
+                  </tr>
+                </thead>
+                <tbody id="recentBugsTableBody"></tbody>
+              </table>
+            </div>
+          </div>
+        </div>
+
+        <!-- VIEW 2: ALL BUGS REPOSITORY -->
+        <div id="view-bugs" class="view-panel" style="display: none;">
+          <div class="table-card">
+            <div class="table-header-toolbar">
+              <div class="toolbar-title">Bug Repository & Incident Triage</div>
+              <div class="filter-group">
+                <input type="text" id="tableSearchInput" class="form-input" placeholder="Search bugs by title, ID, language..." style="width: 240px; padding: 6px 12px; font-size: 13px;">
+                <select id="filterSeveritySelect" class="select-filter">
+                  <option value="">All Severities</option>
+                  <option value="P0">P0 – Critical</option>
+                  <option value="P1">P1 – High</option>
+                  <option value="P2">P2 – Medium</option>
+                  <option value="P3">P3 – Low</option>
+                  <option value="P4">P4 – Info</option>
+                </select>
+                <select id="filterStatusSelect" class="select-filter">
+                  <option value="">All Statuses</option>
+                  <option value="Submitted">Submitted</option>
+                  <option value="Triaged">Triaged</option>
+                  <option value="Assigned">Assigned</option>
+                  <option value="In Progress">In Progress</option>
+                  <option value="In Review">In Review</option>
+                  <option value="Resolved">Resolved</option>
+                  <option value="Closed">Closed</option>
+                </select>
+                <select id="filterTeamSelect" class="select-filter">
+                  <option value="">All Teams</option>
+                </select>
+              </div>
+            </div>
+            <div class="table-responsive">
+              <table class="data-table">
+                <thead>
+                  <tr>
+                    <th>Bug ID</th>
+                    <th>Title & Component</th>
+                    <th>Severity</th>
+                    <th>Status</th>
+                    <th>Assigned Team</th>
+                    <th>Reporter</th>
+                    <th>Date Reported</th>
+                    <th>Actions</th>
+                  </tr>
+                </thead>
+                <tbody id="allBugsTableBody"></tbody>
+              </table>
+            </div>
+          </div>
+        </div>
+
+        <!-- VIEW 3: DEVELOPMENT TEAMS -->
+        <div id="view-teams" class="view-panel" style="display: none;">
+          <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px;">
+            <div>
+              <h2 style="font-size: 20px; font-weight: 700;">Development Engineering Teams</h2>
+              <p style="font-size: 13px; color: var(--text-secondary);">Automated routing targets and cross-functional team ownership.</p>
+            </div>
+          </div>
+          <div id="teamsCardsGrid" class="metrics-grid"></div>
+        </div>
+
+        <!-- VIEW 4: USERS & ROLES -->
+        <div id="view-users" class="view-panel" style="display: none;">
+          <div class="table-card">
+            <div class="table-header-toolbar">
+              <div class="toolbar-title">User Accounts & Role Permissions</div>
+            </div>
+            <div class="table-responsive">
+              <table class="data-table">
+                <thead>
+                  <tr>
+                    <th>User</th>
+                    <th>Email Address</th>
+                    <th>Role</th>
+                    <th>Team</th>
+                    <th>Status</th>
+                    <th>Actions</th>
+                  </tr>
+                </thead>
+                <tbody id="usersTableBody"></tbody>
+              </table>
+            </div>
+          </div>
+        </div>
+
+        <!-- VIEW 5: ANALYTICS & AI EVALUATION -->
+        <div id="view-analytics" class="view-panel" style="display: none;">
+          <div style="margin-bottom: 20px;">
+            <h2 style="font-size: 20px; font-weight: 700;">AI Triage Model Metrics & Evaluation</h2>
+            <p style="font-size: 13px; color: var(--text-secondary);">Monitoring model accuracy, developer feedback loops, and root cause precision.</p>
+          </div>
+          <div class="charts-grid">
+            <div class="chart-card">
+              <div class="chart-header">
+                <div class="chart-title">Developer Feedback on AI Suggestions</div>
+              </div>
+              <div class="chart-container">
+                <canvas id="chartAccuracy"></canvas>
+              </div>
+            </div>
+            <div class="chart-card" style="display: flex; flex-direction: column; justify-content: center; padding: 30px;">
+              <h3 style="font-size: 16px; margin-bottom: 12px; color: var(--accent-purple);">Model Performance Benchmark</h3>
+              <div style="display: flex; flex-direction: column; gap: 12px; font-size: 13.5px;">
+                <div style="display: flex; justify-content: space-between;">
+                  <span>Automated Routing Precision:</span>
+                  <strong style="color: var(--p3-low);">94.2%</strong>
+                </div>
+                <div style="display: flex; justify-content: space-between;">
+                  <span>Severity Classification F1 Score:</span>
+                  <strong style="color: var(--accent-blue);">0.91</strong>
+                </div>
+                <div style="display: flex; justify-content: space-between;">
+                  <span>Code Patch Developer Acceptance:</span>
+                  <strong style="color: var(--accent-purple);">88.4%</strong>
+                </div>
+                <div style="display: flex; justify-content: space-between;">
+                  <span>Mean Time to Triage (MTTT):</span>
+                  <strong>&lt; 3.2 seconds</strong>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- VIEW 6: AUDIT LOGS -->
+        <div id="view-logs" class="view-panel" style="display: none;">
+          <div class="table-card">
+            <div class="table-header-toolbar">
+              <div class="toolbar-title">Enterprise System Audit Trail</div>
+            </div>
+            <div class="table-responsive">
+              <table class="data-table">
+                <thead>
+                  <tr>
+                    <th>Timestamp (UTC)</th>
+                    <th>User</th>
+                    <th>Action</th>
+                    <th>Audit Details</th>
+                    <th>IP Address</th>
+                  </tr>
+                </thead>
+                <tbody id="auditLogsTableBody"></tbody>
+              </table>
+            </div>
+          </div>
+        </div>
+
+        <!-- VIEW 7: SETTINGS -->
+        <div id="view-settings" class="view-panel" style="display: none;">
+          <div style="margin-bottom: 20px;">
+            <h2 style="font-size: 20px; font-weight: 700;">System Settings & Configuration</h2>
+            <p style="font-size: 13px; color: var(--text-secondary);">Manage environment parameters, AI providers, and security thresholds.</p>
+          </div>
+          <div id="settingsAiStatus"></div>
+        </div>
+
+      </div>
+    </main>
+  </div>
+
+  <!-- =========================================================================
+       REPORT A BUG MODAL (WITH MONACO EDITOR & DRAG-DROP UPLOAD)
+       ========================================================================= -->
+  <div id="reportBugModal" class="modal-overlay">
+    <div class="modal-content" style="max-width: 900px;">
+      <div class="modal-header">
+        <div class="modal-title-box">
+          <span style="font-size: 20px;">🐛</span>
+          <h3 style="font-size: 18px; font-weight: 700;">Submit Bug for Automated AI Triage</h3>
+        </div>
+        <button class="close-modal-btn" onclick="app.closeReportBugModal()">&times;</button>
+      </div>
+
+      <div class="modal-body">
+        <form id="newBugForm">
+          <div class="form-group">
+            <label class="form-label">Bug Title *</label>
+            <input type="text" id="bugTitleInput" class="form-input" placeholder="e.g., Unhandled KeyError in Payment Webhook Currency Normalizer" required>
+          </div>
+
+          <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 14px;">
+            <div class="form-group">
+              <label class="form-label">Programming Language</label>
+              <select id="bugLangSelect" class="form-input">
+                <option value="Python">Python</option>
+                <option value="JavaScript">JavaScript</option>
+                <option value="TypeScript">TypeScript</option>
+                <option value="Java">Java</option>
+                <option value="C++">C++</option>
+                <option value="Go">Go</option>
+                <option value="Rust">Rust</option>
+                <option value="SQL">SQL</option>
+                <option value="HTML/CSS">HTML / CSS</option>
+                <option value="YAML/Docker">YAML / Docker / K8s</option>
+              </select>
+            </div>
+            <div class="form-group">
+              <label class="form-label">Framework or Technology</label>
+              <input type="text" id="bugFrameworkInput" class="form-input" placeholder="e.g., FastAPI, React, Postgres, Docker">
+            </div>
+          </div>
+
+          <div class="form-group">
+            <label class="form-label">Detailed Bug Description *</label>
+            <textarea id="bugDescInput" class="form-input" rows="3" placeholder="Explain what occurred, impact on users, and context..." required></textarea>
+          </div>
+
+          <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 14px;">
+            <div class="form-group">
+              <label class="form-label">Expected Behavior</label>
+              <textarea id="bugExpectedInput" class="form-input" rows="2" placeholder="What should have happened?"></textarea>
+            </div>
+            <div class="form-group">
+              <label class="form-label">Actual Behavior</label>
+              <textarea id="bugActualInput" class="form-input" rows="2" placeholder="What actually happened?"></textarea>
+            </div>
+          </div>
+
+          <div class="form-group">
+            <label class="form-label">Steps to Reproduce</label>
+            <textarea id="bugStepsInput" class="form-input" rows="2" placeholder="1. Go to checkout&#10;2. Select currency JPY&#10;3. Submit payment"></textarea>
+          </div>
+
+          <div class="form-group">
+            <label class="form-label">Error Message or Stack Trace</label>
+            <textarea id="bugErrorTraceInput" class="form-input" rows="3" placeholder="Paste full error message or stack trace..." style="font-family: var(--font-mono); font-size: 12px;"></textarea>
+          </div>
+
+          <div class="form-group">
+            <label class="form-label">Environment Information</label>
+            <input type="text" id="bugEnvInput" class="form-input" placeholder="e.g., Production | Python 3.12 | AWS EKS | Chrome 128">
+          </div>
+
+          <!-- Monaco Code Editor for Pasting Source Code -->
+          <div class="form-group">
+            <label class="form-label">Problematic Source Code (Monaco Code Editor)</label>
+            <div id="newBugMonacoContainer" class="monaco-editor-box" style="height: 200px;"></div>
+          </div>
+
+          <!-- Drag and Drop File Upload -->
+          <div class="form-group">
+            <label class="form-label">Upload Logs, Source Files or Screenshots (Max 15MB)</label>
+            <div id="bugDropzone" class="dropzone-container">
+              <div class="dropzone-icon">📁</div>
+              <p style="font-size: 13.5px; font-weight: 500;">Click to browse or drag & drop files here</p>
+              <p style="font-size: 12px; color: var(--text-muted); margin-top: 4px;">Supported: .py, .js, .ts, .log, .sql, .json, .png, .jpg (Executables rejected)</p>
+            </div>
+            <input type="file" id="bugFileInput" multiple style="display: none;" accept=".py,.js,.jsx,.ts,.tsx,.java,.cpp,.c,.sql,.html,.css,.json,.txt,.log,.md,.png,.jpg,.jpeg,.webp">
+            <div id="uploadedFilesList"></div>
+          </div>
+
+          <div class="modal-footer" style="padding: 16px 0 0 0; background: transparent;">
+            <button type="button" class="action-btn-sm" onclick="app.closeReportBugModal()">Cancel</button>
+            <button type="submit" id="submitBugBtn" class="btn-primary" style="width: auto; padding: 10px 24px;">
+              <span>🚀 Submit Bug for AI Analysis</span>
+            </button>
+          </div>
+        </form>
+      </div>
+    </div>
+  </div>
+
+  <!-- TRIAGE PROGRESS OVERLAY -->
+  <div id="triageProgressOverlay" class="modal-overlay" style="z-index: 150; display: none;">
+    <div style="background: var(--bg-card); border: 1px solid var(--border-color); border-radius: 16px; padding: 36px 48px; text-align: center; box-shadow: var(--shadow-lg);">
+      <div class="brand-icon-wrapper" style="animation: pulse 1.5s infinite;">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <circle cx="12" cy="12" r="10"></circle>
+          <polyline points="12 6 12 12 14 14"></polyline>
+        </svg>
+      </div>
+      <h3 style="font-size: 18px; font-weight: 700; margin-top: 14px;">AI Bug Triage in Progress</h3>
+      <p id="triageProgressStatus" style="font-size: 13.5px; color: var(--accent-purple); margin-top: 8px;">Analyzing stack trace & code parameters...</p>
+    </div>
+  </div>
+
+  <!-- =========================================================================
+       BUG DETAIL & AI ANALYSIS RESULTS MODAL (WITH MONACO DIFF VIEWER)
+       ========================================================================= -->
+  <div id="bugDetailModal" class="modal-overlay">
+    <div class="modal-content">
+      <div class="modal-header">
+        <div class="modal-title-box">
+          <span style="font-size: 20px;">🔬</span>
+          <h3 style="font-size: 17px; font-weight: 700;">Bug Triage & AI Root-Cause Intelligence</h3>
+        </div>
+        <button class="close-modal-btn" onclick="app.closeBugDetailModal()">&times;</button>
+      </div>
+      <div id="bugDetailModalBody" class="modal-body"></div>
+    </div>
+  </div>
+
+  <!-- TOAST CONTAINER -->
+  <div id="toastContainer" class="toast-container"></div>
+
+  <!-- APPLICATION SCRIPTS -->
+  <script src="js/api.js"></script>
+  <script src="js/monaco_helper.js"></script>
+  <script src="js/charts.js"></script>
+  <script src="js/app.js"></script>
+</body>
+</html>
