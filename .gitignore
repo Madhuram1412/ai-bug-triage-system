@@ -23,6 +23,9 @@ wheels/
 .installed.cfg
 *.egg
 
+# Local tools & binaries
+tools/
+
 # Testing & Cache
 .pytest_cache/
 .coverage
