@@ -2,12 +2,19 @@
  * AI Bug Triage System - API Client
  */
 
-const API_BASE = '/api';
+let API_BASE = '/api';
+if (window.location.protocol === 'file:') {
+  API_BASE = 'http://127.0.0.1:8000/api';
+}
 
 class ApiClient {
   constructor() {
     this.tokenKey = 'bug_triage_jwt_token';
     this.userKey = 'bug_triage_user_data';
+  }
+
+  getBaseUrl() {
+    return API_BASE;
   }
 
   getToken() {
@@ -34,7 +41,7 @@ class ApiClient {
   }
 
   async request(endpoint, options = {}) {
-    const url = `${API_BASE}${endpoint}`;
+    let url = `${API_BASE}${endpoint}`;
     const headers = options.headers || {};
 
     const token = this.getToken();

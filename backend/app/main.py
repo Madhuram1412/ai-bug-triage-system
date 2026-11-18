@@ -217,4 +217,29 @@ if os.path.exists(frontend_dir):
 
 if __name__ == "__main__":
     import uvicorn
-    uvicorn.run("backend.app.main:app", host=settings.HOST, port=settings.PORT, reload=settings.DEBUG)
+    import socket
+
+    def is_port_free(port: int) -> bool:
+        with socket.socket(socket.AF_INET, socket.SOCK_STREAM) as s:
+            try:
+                s.bind(('127.0.0.1', port))
+                return True
+            except OSError:
+                return False
+
+    target_port = 8000
+    if not is_port_free(8000):
+        for p in [8001, 8002, 8080]:
+            if is_port_free(p):
+                target_port = p
+                break
+
+    print(f"\n=======================================================")
+    print(f"  AI BUG TRIAGE SYSTEM - BACKEND READY")
+    print(f"=======================================================")
+    print(f"  Web Application: http://127.0.0.1:{target_port}")
+    print(f"  API Docs:        http://127.0.0.1:{target_port}/docs")
+    print(f"=======================================================\n")
+
+    uvicorn.run("backend.app.main:app", host=settings.HOST, port=target_port, reload=settings.DEBUG)
+
