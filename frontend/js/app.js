@@ -20,6 +20,12 @@ class BugTriageApp {
 
   async init() {
     this.initTheme();
+    if (window.CyberEngine) {
+      window.cyberEngine = new window.CyberEngine();
+    }
+    if (window.MySQLManager) {
+      window.MySQLManager.init();
+    }
     this.bindEvents();
     await this.checkAuth();
   }
@@ -106,34 +112,54 @@ class BugTriageApp {
   }
 
   renderAuthPage() {
-    document.getElementById('authContainer').style.display = 'flex';
-    document.getElementById('appContainer').style.display = 'none';
+    const authEl = document.getElementById('authContainer');
+    const appEl = document.getElementById('appContainer');
+    if (authEl) authEl.style.display = 'flex';
+    if (appEl) appEl.style.display = 'none';
+
+    // Close any overlays
+    document.querySelectorAll('.modal-overlay').forEach(m => {
+      m.classList.remove('active');
+      m.style.display = 'none';
+    });
   }
 
   renderDashboardLayout() {
-    document.getElementById('authContainer').style.display = 'none';
-    document.getElementById('appContainer').style.display = 'flex';
+    const authEl = document.getElementById('authContainer');
+    const appEl = document.getElementById('appContainer');
+    if (authEl) authEl.style.display = 'none';
+    if (appEl) appEl.style.display = 'flex';
 
     // Populate user topbar info
-    document.getElementById('topbarUserName').textContent = this.currentUser.full_name;
-    document.getElementById('topbarUserRole').textContent = this.currentUser.role;
-    document.getElementById('topbarAvatar').textContent = this.currentUser.full_name.charAt(0).toUpperCase();
+    const nameEl = document.getElementById('topbarUserName');
+    if (nameEl && this.currentUser) nameEl.textContent = this.currentUser.full_name;
+
+    const roleEl = document.getElementById('topbarUserRole');
+    if (roleEl && this.currentUser) roleEl.textContent = this.currentUser.role;
+
+    const avatarEl = document.getElementById('topbarAvatar');
+    if (avatarEl && this.currentUser) avatarEl.textContent = this.currentUser.full_name.charAt(0).toUpperCase();
 
     // Populate dropdown info if present
     const ddName = document.getElementById('dropdownUserFullName');
     const ddEmail = document.getElementById('dropdownUserEmail');
-    if (ddName) ddName.textContent = this.currentUser.full_name;
-    if (ddEmail) ddEmail.textContent = this.currentUser.email;
+    if (ddName && this.currentUser) ddName.textContent = this.currentUser.full_name;
+    if (ddEmail && this.currentUser) ddEmail.textContent = this.currentUser.email;
 
     // Configure sidebar items visibility based on role
     this.configureRoleSidebar();
 
-    // Load initial views
-    this.switchView('overview');
+    // Default to Cyberpunk IDE view from Screenshots
+    if (window.cyberEngine) {
+      window.cyberEngine.openIdeView();
+    } else {
+      this.switchView('overview');
+    }
     this.loadNotifications();
   }
 
   configureRoleSidebar() {
+    if (!this.currentUser) return;
     const role = this.currentUser.role;
     const adminNavs = document.querySelectorAll('.nav-admin-only');
     const devNavs = document.querySelectorAll('.nav-dev-only');
@@ -152,20 +178,26 @@ class BugTriageApp {
   }
 
   async logout() {
-    window.api.clearSession();
+    try {
+      window.api.clearSession();
+    } catch (e) {}
+
     this.currentUser = null;
     this.selectedBug = null;
     this.allBugs = [];
 
-    // Close any open modals and dropdown drawers
-    document.querySelectorAll('.modal-overlay').forEach(m => m.classList.remove('active'));
+    // Close any open modals and dropdown drawers completely
+    document.querySelectorAll('.modal-overlay').forEach(m => {
+      m.classList.remove('active');
+      m.style.display = 'none';
+    });
     document.getElementById('notificationsDrawer')?.classList.remove('active');
     document.getElementById('userDropdownMenu')?.classList.remove('active');
 
     // Reset view state
     this.currentView = 'overview';
 
-    this.showToast('You have been logged out.', 'info');
+    this.showToast('You have been logged out successfully.', 'info');
     this.renderAuthPage();
   }
 

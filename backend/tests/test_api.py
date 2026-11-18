@@ -105,3 +105,27 @@ def test_analytics_charts():
     assert "severity_distribution" in charts
     assert "bugs_by_team" in charts
     assert len(charts["bugs_by_team"]) >= 5
+
+def test_database_status_endpoint():
+    res = client.get("/api/database/status")
+    assert res.status_code == 200
+    data = res.json()
+    assert "active_engine" in data
+    assert "mysql_info" in data
+    assert "is_mysql" in data
+
+def test_triage_report_telemetry():
+    res = client.get("/api/triage/report-telemetry")
+    assert res.status_code == 200
+    data = res.json()
+    assert "analysis_time" in data
+    assert "fix_efficiency" in data
+    assert "security_score" in data
+
+def test_triage_apply_fix():
+    res = client.post("/api/triage/apply-fix", json={"file_id": "AI_BUG_STK3_R1", "bug_id": 1})
+    assert res.status_code == 200
+    data = res.json()
+    assert data["status"] == "success"
+    assert data["file_id"] == "AI_BUG_STK3_R1"
+
